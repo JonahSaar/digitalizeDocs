@@ -2,6 +2,7 @@ import os
 from re import search
 import datefinder
 import PyPDF4
+import json
 
 # Folder scan
 path ="/Users/jonah/PycharmProjects/digitalizeDocs"
@@ -39,4 +40,34 @@ for check in checks:
             pass
 
 
+def get_temp_files():
 
+    list = []
+    for file in os.listdir("temp"):
+
+        list.append(
+            {
+                "project": "",
+                "company": "",
+                "filepath": "",
+                "category": "",
+                "date": "",
+            }
+        )
+
+
+    return list
+
+
+def get_companys():
+    f = open('companys.json', )
+    data = json.load(f)
+    f.close()
+    return data
+
+
+def get_projects():
+    f = open('projects.json', )
+    data = json.load(f)
+    f.close()
+    return data

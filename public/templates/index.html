@@ -7,14 +7,17 @@
 <body>
 
 
-    <div>
+
         {% for project in projects %}
-        <p>{{ project.name }}</p>
-          {% for file in project.files %}
-            <p>{{ file }}</p>
-          {% endfor %}
+            <div>
+                <h2>{{ project.name }}</h2>
+                  {% for file in project.files %}
+                    <p>{{ file }}</p>
+                  {% endfor %}
+            <div>
         {% endfor %}
-    </div>
+
+
 
 
 </body>
