@@ -1,14 +1,18 @@
+import logging
 import os
 import shutil
+import threading
 from re import search
-import PyPDF4
 import json
-import PIL
+from time import sleep
+
 from PIL import Image
 import pytesseract
 
+import webapp
+logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(name)s - %(levelname)s - %(message)s')
 
-def save_file_temp(file: str, category: str = "none", date: str = "none"):
+def save_file_temp(file: str, category: str = "", date: str = ""):
     destination = "public/temp"
     shutil.move("scans/" + file, "public/temp/" + category + "_" + date + ".png")
 
@@ -32,8 +36,11 @@ def get_cat_and_date(file_list):
             if date is None:
                 save_file_temp(file, Rechnung1)
             else:
-                save_file_temp(file, Rechnung1, date.group(0))
-            continue
+                date = date.group(0)
+                date = date.replace(".", "-")
+                save_file_temp(file, Rechnung1, date)
+
+
         if catergory_A1 != None:
             date = search(r'\d{2}-\d{2}-\d{4}', text)
             save_file_temp(file, Angebot1, date)
@@ -42,15 +49,19 @@ def get_cat_and_date(file_list):
 def get_temp_files():
     list = []
     for file in os.listdir("public/temp"):
-        list.append(
-            {
-                "project": "Projekt A",
-                "company": "Peter baut Tief",
-                "filepath": "Test.pdf",
-                "category": "Rechnung",
-                "date": "02-02-2021"
-            }
-        )
+        if file.endswith('.png'):
+            filename = file.split(".")[0]
+            params = filename.split("_")
+            list.append(
+                {
+                    "project": "",
+                    "company": "",
+                    "filepath": file,
+                    "category": params[0],
+                    "date": params[1]
+                }
+            )
+
 
     return list
 
@@ -95,10 +106,21 @@ def read_files():
     for file in dirs:
         if file.endswith('.png'):
             file_list.append(file)
-    print(file_list)
+    if file_list:
+        print(file_list)
     return file_list
 
 
 if __name__ == "__main__":
-    file_list = read_files()
-    get_cat_and_date(file_list)
+
+    logging.getLogger("main").info("start")
+
+    webapp = threading.Thread(target=webapp.run)
+    webapp.daemon = True
+    webapp.start()
+
+    while True:
+        logging.getLogger("main").info("check for new files")
+        file_list = read_files()
+        get_cat_and_date(file_list)
+        sleep(5)

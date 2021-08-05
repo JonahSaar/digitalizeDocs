@@ -3,3 +3,5 @@ fastapi
 starlette
 python-multipart
 Pillow
+uvicorn
+pytesseract
