@@ -3,43 +3,45 @@ import shutil
 from re import search
 import PyPDF4
 import json
-import Pillow
+import PIL
+from PIL import Image
+import pytesseract
 
-def save_file_temp (file,category, date):
+
+def save_file_temp(file: str, category: str = "none", date: str = "none"):
     destination = "public/temp"
-    shutil.move("scans/"+file, "public/temp/"+category+"_"+date+".pdf")
-    print("save_file")
+    shutil.move("scans/" + file, "public/temp/" + category + "_" + date + ".png")
 
 
 def get_cat_and_date(file_list):
     # define keyterms
-    Rechnung = "Rechnung"
-    Angebot = "Angebot"
+    Rechnung1 = "Rechnung"
+    Rechnung2 = "RECHNUNG"
+    Angebot1 = "Angebot"
+    Angebot2 = "ANGEBOT"
+
     for file in file_list:
-        pdfFileObj = open("scans/"+file, 'rb')
-        # open the pdf file
-        object = PyPDF4.PdfFileReader(pdfFileObj)
+        text = pytesseract.image_to_string(Image.open('scans/' + file), lang="deu")
         # extract text and do the search
-        text = object.getPage(0).extractText()
-        # print(Text)
-        print (text)
-        category_R = search(Rechnung, text)
-        catergory_A = search(Angebot, text)
-        if category_R == "Rechnung":
+
+        category_R1 = search(Rechnung1, text)
+        catergory_A1 = search(Angebot1, text)
+        if category_R1 != None:
+            date = search(r'\d{2}.\d{2}.\d{4}', text)
+            print(date)
+            if date is None:
+                save_file_temp(file, Rechnung1)
+            else:
+                save_file_temp(file, Rechnung1, date.group(0))
+            continue
+        if catergory_A1 != None:
             date = search(r'\d{2}-\d{2}-\d{4}', text)
-            print("Rechnung")
-            save_file_temp(file,category_R,date)
-            return
-        if catergory_A == "Angebot":
-            date = search(r'\d{2}-\d{2}-\d{4}', text)
-            save_file_temp(file, catergory_A, date)
+            save_file_temp(file, Angebot1, date)
 
 
 def get_temp_files():
-
     list = []
     for file in os.listdir("public/temp"):
-
         list.append(
             {
                 "project": "",
@@ -49,7 +51,6 @@ def get_temp_files():
                 "date": "",
             }
         )
-
 
     return list
 
@@ -92,12 +93,12 @@ def read_files():
     file_list = []
     # Liste an zu kontrollierenden Files erstellen
     for file in dirs:
-        if file.endswith('.pdf'):
+        if file.endswith('.png'):
             file_list.append(file)
     print(file_list)
     return file_list
 
 
 if __name__ == "__main__":
-    file_list=read_files()
+    file_list = read_files()
     get_cat_and_date(file_list)
