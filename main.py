@@ -4,7 +4,7 @@ import PyPDF4
 import json
 
 # Folder scan
-path ="/"
+path ="scans"
 dirs = os.listdir(path)
 dirs.sort()
 checks = []
