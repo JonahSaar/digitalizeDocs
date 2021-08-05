@@ -42,11 +42,11 @@ def get_temp_files():
 
         list.append(
             {
-                "project": "",
-                "company": "",
-                "filepath": "",
-                "category": "",
-                "date": "",
+                "project": "Projekt A",
+                "company": "Peter baut Tief",
+                "filepath": "Test.pdf",
+                "category": "Rechnung",
+                "date": "02-02-2021"
             }
         )
 
