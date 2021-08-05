@@ -10,7 +10,6 @@ app = FastAPI()
 app.mount("/public/static", StaticFiles(directory="public/static"), name="static")
 templates = Jinja2Templates(directory="public/templates")
 
-projects = [{"name": "Project 1", "files": ["Rechnung_2021-05-08.pdf", "Rechnung_2021-05-08.pdf", "Rechnung_2021-05-08.pdf"]}]
 
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):
@@ -18,7 +17,7 @@ async def read_item(request: Request):
     main.get_temp_files()
 
     companies = main.get_companies()
-    main.get_projects()
+    projects = main.get_projects()
 
-    return templates.TemplateResponse("index.html", {"request": request, "title": "test", "projects": projects})
+    return templates.TemplateResponse("index.html", {"request": request, "title": "test", "projects": projects, "companies": companies})
 

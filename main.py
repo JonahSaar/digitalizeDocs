@@ -1,11 +1,10 @@
 import os
 from re import search
-import datefinder
 import PyPDF4
 import json
 
 # Folder scan
-path ="/Users/jonah/PycharmProjects/digitalizeDocs"
+path ="/"
 dirs = os.listdir(path)
 dirs.sort()
 checks = []
@@ -43,7 +42,7 @@ for check in checks:
 def get_temp_files():
 
     list = []
-    for file in os.listdir("temp"):
+    for file in os.listdir("public/temp"):
 
         list.append(
             {
