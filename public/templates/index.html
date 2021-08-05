@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+
+    <span>{{ projects }}</span>
+
+    <div>
+        {% for project in projects %}
+        <p>{{ project.name }}</p>
+          {% for file in project.files %}
+            <p>{{ file }}</p>
+          {% endfor %}
+        {% endfor %}
+    </div>
+
+</body>
+</html>

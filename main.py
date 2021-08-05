@@ -31,10 +31,12 @@ for check in checks:
         ResSearch1 = search(String1, Text)
         ResSearch2 = search(String1, Text)
         if ResSearch1=="Rechnung":
-            #TODO Dann kontrolliere nach Datum
+            # TODO Dann kontrolliere nach Datum
             #anschließend speichere es ab
+            pass
         if ResSearch2== "Angebot":
             # TODO s.o
+            pass
 
 
 
