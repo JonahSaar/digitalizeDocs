@@ -59,8 +59,8 @@ def get_temp_files():
     return list
 
 
-def get_companys():
-    f = open('companys.json', )
+def get_companies():
+    f = open('companies.json', )
     data = json.load(f)
     f.close()
     return data

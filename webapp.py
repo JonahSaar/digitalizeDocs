@@ -17,7 +17,7 @@ async def read_item(request: Request):
 
     main.get_temp_files()
 
-    main.get_companys()
+    companies = main.get_companies()
     main.get_projects()
 
     return templates.TemplateResponse("index.html", {"request": request, "title": "test", "projects": projects})
