@@ -26,23 +26,26 @@ def get_cat_and_date(file_list):
 
     for file in file_list:
         text = pytesseract.image_to_string(Image.open('scans/' + file), lang="deu")
-        # extract text and do the search
 
-        category_R1 = search(Rechnung1, text)
-        catergory_A1 = search(Angebot1, text)
-        if category_R1 != None:
-            date = search(r'\d{2}.\d{2}.\d{4}', text)
+        # Extract Date
+        date = search(r'\d{2}.\d{2}.\d{4}', text)
+        if date is not None:
             print(date)
             if date is None:
                 save_file_temp(file, Rechnung1)
             else:
                 date = date.group(0)
                 date = date.replace(".", "-")
-                save_file_temp(file, Rechnung1, date)
+        else:
+            date = ""
 
+        # Determine if Rechnung or Angebot
+        category_R1 = search(Rechnung1, text)
+        catergory_A1 = search(Angebot1, text)
 
-        if catergory_A1 != None:
-            date = search(r'\d{2}-\d{2}-\d{4}', text)
+        if category_R1 is not None:
+            save_file_temp(file, Rechnung1, date)
+        elif catergory_A1 is not None:
             save_file_temp(file, Angebot1, date)
 
 
