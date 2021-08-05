@@ -8,7 +8,7 @@ app = FastAPI()
 app.mount("/public/static", StaticFiles(directory="public/static"), name="static")
 templates = Jinja2Templates(directory="public/templates")
 
-projects = { "name": "project 1", "files": ["A", "B", "C"]}
+projects = [{"name": "project 1", "files": ["Rechnung_2021-05-08.pdf", "Rechnung_2021-05-08.pdf", "Rechnung_2021-05-08.pdf"]}]
 
 
 @app.get("/", response_class=HTMLResponse)
