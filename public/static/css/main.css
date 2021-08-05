@@ -1,4 +1,9 @@
-.files{
+body{
+    margin: 0;
+    padding: 0;
+}
+
+.file{
     display: grid;
     grid-template-columns: 6fr 4fr;
 }
@@ -9,4 +14,9 @@ input{
 }
 form{
     padding: 2vw;
+}
+
+.pdf{
+    height: 100vh;
+    border: none;
 }

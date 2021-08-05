@@ -8,47 +8,44 @@
 </head>
 <body>
 
-
-        <h2>Dateien</h2>
         <div class="files">
-              <iframe
-                    src="/public/static/pdf/web/viewer.html?file=../../../temp/Test.pdf"
-                    width="100%"
-                    height="600px"
-                    style="border: none;"></iframe>
             {% for file in files %}
-                <form>
-                    <h3>{{ file }}</h3>
-                    <label>Projekt:</label>
-                    <input value="{{ file.project }}" type="text">
-                    <label>Firma:</label>
-                    <input value="{{ file.company }}" type="text">
-                    <label>Datei:</label>
-                    <input value="{{ file.filepath }}" type="text">
-                    <label>Kategorie:</label>
-                    <input value="{{ file.category }}" type="text">
-                    <label>Datum:</label>
-                    <input value="{{ file.date }}" type="text">
+                <div class="file">
+                    <iframe class="pdf"
+                        src="/public/static/pdf/web/viewer.html?file=../../../temp/Test.pdf"
+                        width="100%"
+                        height="100%"></iframe>
 
-                    <button> Speichern </button>
-                </form>
+                    <form method="post">
+                        <h1>{{ file.filepath }}</h1>
+                        <label>Projekt:</label>
+                        <input name="project" type="text" list="projects" value="{{ file.project }}">
+                        <label>Firma:</label>
+                        <input name="company" type="text" list="companies" value="{{ file.company }}">
+                        <label>Kategorie:</label>
+                        <input name="category" value="{{ file.category }}" type="text">
+                        <label>Datum:</label>
+                        <input name="date" value="{{ file.date }}" type="text">
+                        <input type="submit" value="Speichern">
+                    </form>
+                </div>
             {% endfor %}
-
         </div>
 
-        <h2>Projekte</h2>
-        {% for project in projects %}
-            <div>
-                <h3>{{ project }}</h3>
-            </div>
-        {% endfor %}
+        <datalist id="projects">
+            {% for project in projects %}
+                <option>{{ project }}</option>
+            {% endfor %}
+        </datalist>
 
-        <h2>Firmen</h2>
-        {% for company in companies %}
-            <div>
-                <h3>{{ company }}</h3>
-            </div>
-        {% endfor %}
+        <datalist id="companies">
+            {% for company in companies %}
+                <option>{{ company }}</option>
+            {% endfor %}
+        </datalist>
+
+
+
 
 
 
