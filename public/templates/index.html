@@ -3,22 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
+
+    <link rel="stylesheet" href="public/static/css/main.css">
 </head>
 <body>
 
 
+        <h2>Dateien</h2>
+        <div class="files">
+              <iframe
+                    src="/public/static/pdf/web/viewer.html?file=../../../temp/Test.pdf"
+                    width="100%"
+                    height="600px"
+                    style="border: none;"></iframe>
+            {% for file in files %}
+                <form>
+                    <h3>{{ file }}</h3>
+                    <label>Projekt:</label>
+                    <input value="{{ file.project }}" type="text">
+                    <label>Firma:</label>
+                    <input value="{{ file.company }}" type="text">
+                    <label>Datei:</label>
+                    <input value="{{ file.filepath }}" type="text">
+                    <label>Kategorie:</label>
+                    <input value="{{ file.category }}" type="text">
+                    <label>Datum:</label>
+                    <input value="{{ file.date }}" type="text">
 
+                    <button> Speichern </button>
+                </form>
+            {% endfor %}
+
+        </div>
+
+        <h2>Projekte</h2>
         {% for project in projects %}
             <div>
-                <h2>{{ project.name }}</h2>
-                  {% for file in project.files %}
-                    <p>{{ file }}</p>
-                  {% endfor %}
+                <h3>{{ project }}</h3>
+            </div>
+        {% endfor %}
+
+        <h2>Firmen</h2>
+        {% for company in companies %}
             <div>
+                <h3>{{ company }}</h3>
+            </div>
         {% endfor %}
 
 
 
+<script src="public/static/js/lib/pdf.min.js"></script>
 
 </body>
 </html>
