@@ -1,5 +1,4 @@
 PyPDF4~=1.27.0
-datefinder
 fastapi
 starlette
 python-multipart
