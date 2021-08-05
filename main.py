@@ -3,7 +3,7 @@ import shutil
 from re import search
 import PyPDF4
 import json
-
+import Pillow
 
 def save_file_temp (file,category, date):
     destination = "public/temp"
