@@ -17,19 +17,21 @@
                     height="600px"
                     style="border: none;"></iframe>
             {% for file in files %}
-                <div>
+                <form>
                     <h3>{{ file }}</h3>
                     <label>Projekt:</label>
                     <input value="{{ file.project }}" type="text">
-                <label>Firma:</label>
+                    <label>Firma:</label>
                     <input value="{{ file.company }}" type="text">
-                <label>Datei:</label>
+                    <label>Datei:</label>
                     <input value="{{ file.filepath }}" type="text">
-                <label>Kategorie:</label>
+                    <label>Kategorie:</label>
                     <input value="{{ file.category }}" type="text">
-                <label>Datum:</label>
+                    <label>Datum:</label>
                     <input value="{{ file.date }}" type="text">
-                </div>
+
+                    <button> Speichern </button>
+                </form>
             {% endfor %}
 
         </div>
