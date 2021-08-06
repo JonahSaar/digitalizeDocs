@@ -10,7 +10,8 @@ from PIL import Image
 import pytesseract
 
 import pdf2image
-import datefinder
+import dateparser
+
 
 import webapp
 
@@ -18,16 +19,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(name)s - %(leveln
 
 
 def save_file_temp(file, category: str = "", date: str = ""):
-    destination = "public/temp"
     shutil.move("scans/" + file, "public/temp/" + category + "_" + date + ".png")
 
 
 def get_cat_and_date(file_list):
-    # define keyterms
+    # define keys
     rechnung = "Rechnung"
     angebot = "Angebot"
     gutachten = "Gutachten"
-
+    text = ""
+    file = ""
     for file in file_list:
         text = pytesseract.image_to_string(Image.open('scans/' + file), lang="deu")
 
@@ -42,15 +43,15 @@ def get_cat_and_date(file_list):
         date = ""
 
         # Determine if Rechnung or Angebot or Gutachten
-        category_R = search(rechnung, text)
-        catergory_A = search(angebot, text)
-        catergory_G = search(gutachten, text)
+        category_r = search(rechnung, text)
+        catergory_a = search(angebot, text)
+        catergory_g = search(gutachten, text)
 
-        if category_R is not None:
+        if category_r is not None:
             save_file_temp(file, rechnung, date)
-        elif catergory_A is not None:
+        elif catergory_a is not None:
             save_file_temp(file, angebot, date)
-        elif catergory_G is not Node:
+        elif catergory_g is not Node:
             save_file_temp(file, gutachten, date)
 
 
@@ -119,17 +120,17 @@ def read_files():
     return file_list
 
 
-def pdf_to_png (path,filename):
+def pdf_to_png(path, filename):
     # What happens if we have multiple pages?
     # just analize the first page
     # then delete it.
     # Store Pdf with convert_from_path function
     images = convert_from_path(filename)
     # Save pages as images in the pdf
-    images[0].save(path+"/"+filename+'.png', 'PNG')
+    images[0].save(path + "/" + filename + '.png', 'PNG')
 
 
-def unternehmem_txt_to_json(path: str = "/Unternehmen.txt"):
+def unternehmem_txt_to_json():
     file1 = open('Unternehmen.txt', 'w')
     lines = file1.readlines()
     count = 0
@@ -137,6 +138,22 @@ def unternehmem_txt_to_json(path: str = "/Unternehmen.txt"):
     for line in lines:
         count += 1
         c.update(line)
+
+
+def find_date(text):
+    month_list = ['Januar', 'januar', 'Februar', 'februar', 'März', 'märz', 'April', 'mai', 'Mai',
+                  'juni', 'Juni', 'juli', 'Juli', 'august', 'August', 'September',
+                  'september', 'oktober', 'Oktober','november', 'November', 'dezember', 'Dezember']
+    dd_mm_yyyy_pattern = "r'\d{2}.\d{2}.\d{4}'"
+    dd_mm_yyyy_pattern2 = "r'\d{2}-\d{2}-\d{4}'"
+    yyyy_mm_dd_pattern =  "r'\d{4}.\d{2}.\d{2}'"
+    yyyy_mm_dd_pattern2 = "r'\d{4}.\d{2}.\d{2}'"
+    dd_month_yyyy_pattern = "" #TODO iter erstellen
+    day_month_yyyy_pattern = ""
+    date_list = []
+    #restliche formatierungen haben pech gehabt
+
+
 
 
 if __name__ == "__main__":
