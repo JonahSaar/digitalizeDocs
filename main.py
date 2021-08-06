@@ -9,20 +9,24 @@ from time import sleep
 from PIL import Image
 import pytesseract
 
+import pdf2image
+import datefinder
+
 import webapp
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(name)s - %(levelname)s - %(message)s')
 
-def save_file_temp(file: str, category: str = "", date: str = ""):
+
+def save_file_temp(file, category: str = "", date: str = ""):
     destination = "public/temp"
     shutil.move("scans/" + file, "public/temp/" + category + "_" + date + ".png")
 
 
 def get_cat_and_date(file_list):
     # define keyterms
-    Rechnung1 = "Rechnung"
-    Rechnung2 = "RECHNUNG"
-    Angebot1 = "Angebot"
-    Angebot2 = "ANGEBOT"
+    rechnung = "Rechnung"
+    angebot = "Angebot"
+    gutachten = "Gutachten"
 
     for file in file_list:
         text = pytesseract.image_to_string(Image.open('scans/' + file), lang="deu")
@@ -30,26 +34,28 @@ def get_cat_and_date(file_list):
         # Extract Date
         date = search(r'\d{2}.\d{2}.\d{4}', text)
         if date is not None:
-            print(date)
-            if date is None:
-                save_file_temp(file, Rechnung1)
-            else:
-                date = date.group(0)
-                date = date.replace(".", "-")
+            save_file_temp(file, rechnung)
         else:
-            date = ""
+            date = date.group(0)
+            date = date.replace(".", "-")
+    else:
+        date = ""
 
-        # Determine if Rechnung or Angebot
-        category_R1 = search(Rechnung1, text)
-        catergory_A1 = search(Angebot1, text)
+        # Determine if Rechnung or Angebot or Gutachten
+        category_R = search(rechnung, text)
+        catergory_A = search(angebot, text)
+        catergory_G = search(gutachten, text)
 
-        if category_R1 is not None:
-            save_file_temp(file, Rechnung1, date)
-        elif catergory_A1 is not None:
-            save_file_temp(file, Angebot1, date)
+        if category_R is not None:
+            save_file_temp(file, rechnung, date)
+        elif catergory_A is not None:
+            save_file_temp(file, angebot, date)
+        elif catergory_G is not Node:
+            save_file_temp(file, gutachten, date)
 
 
 def get_temp_files():
+    # TODO
     list = []
     for file in os.listdir("public/temp"):
         if file.endswith('.png'):
@@ -64,7 +70,6 @@ def get_temp_files():
                     "date": params[1]
                 }
             )
-
 
     return list
 
@@ -112,6 +117,26 @@ def read_files():
     if file_list:
         print(file_list)
     return file_list
+
+
+def pdf_to_png (path,filename):
+    # What happens if we have multiple pages?
+    # just analize the first page
+    # then delete it.
+    # Store Pdf with convert_from_path function
+    images = convert_from_path(filename)
+    # Save pages as images in the pdf
+    images[0].save(path+"/"+filename+'.png', 'PNG')
+
+
+def unternehmem_txt_to_json(path: str = "/Unternehmen.txt"):
+    file1 = open('Unternehmen.txt', 'w')
+    lines = file1.readlines()
+    count = 0
+    c = json.load(companies.json)
+    for line in lines:
+        count += 1
+        c.update(line)
 
 
 if __name__ == "__main__":
