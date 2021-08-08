@@ -10,8 +10,7 @@ from shutil import copyfile
 from PIL import Image
 import pytesseract
 
-from pdf2image import convert_from_path
-from pdf2image import PDFInfo
+from pdf2image import convert_from_path, pdfinfo_from_path
 
 import webapp
 
@@ -23,14 +22,13 @@ def save_file_temp(file, id, companies, category,dates):
     id = {   
         "ID": id,
         "project": "",
-        "company": companies,
+        "company": company,
         "filepath": file,
         "category": category,
         "date": dates
     }
-    jsonString = json.dumps(id)
-    jsonFile = open("data.json", "w")
-    jsonFile.write(jsonString)
+    json.dump(id, data.json) #add file path
+    filesData.append(dict)
     #Move from scans to temp 
     shutil.move("scans/" + file, "public/temp/" +id+ ".pdf")
 
@@ -200,29 +198,37 @@ def find_date(text):
     return date
 
 #Save after editing 
-def save_Final (data): # data = dic from frontend or json? TODO  
-    #Final Json 
-    #"ID": id,
-    #"project": project,
-    #"company": company,
-    #"filepath": file,
-    #"category": category,
-    #"date": date
-    # If folder doesnt exist, create it. Afterwards add file with count if alrady existing 
-    if (os.path.isdir('public/'+data["project"]) is False):
-        os.mkdir('public/'+data["project"])
-    if (os.path.isdir('public/'+data["project"]+'/'+data["category"]) is False):
-        os.mkdir('public/'+data["project"]+'/'+data["category"])
-    if (os.path.isdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]) is False):
-        os.mkdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"])   
-    if (os.path.isfile('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]) is False):   
-          shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+".pdf")
-    # Sonst zähle auf und füge nummer hinzu TODO überarbeiten, dass nur die gezählt werden mit dem datum + Lines deleten nach Scan 
-    #Vielleicht einfach alle Dateien mit einem Counter versehen? 
-    dirs = os.listdir("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"])
-    counter = len(dirs)
-    shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+len+".pdf")    
-
+def save_Final (): 
+    # Save all editeted files in a .txt document with their id  TODO 
+    file1 = open('files_to_save.txt', 'w')
+    # All dicts are saved in files_data 
+        #"ID": id,
+        #"project": "blabla",
+        #"company": company,
+        #"filepath": file,
+        #"category": category,
+        #"date": date
+    lines = file1.readlines()
+    for file in lines:
+        #Erst Id rausnehmen
+        id = file['ID']
+        #Dann dic suchen passend zur ID 
+        data = filesData[id]
+        # Wenn noch noch kein Projekt Ordner angelegt ist, dann ordner anlegen zum schluss wenn datei vorhanden dann mit counter
+        if (os.path.isdir('public/'+data["project"]) is False):
+            os.mkdir('public/'+data["project"])
+        if (os.path.isdir('public/'+data["project"]+'/'+data["category"]) is False):
+            os.mkdir('public/'+data["project"]+'/'+data["category"])
+        if (os.path.isdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]) is False):
+            os.mkdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"])   
+        if (os.path.isfile('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]) is False):   
+              shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+".pdf")
+        # Sonst zähle auf und füge nummer hinzu TODO überarbeiten, dass nur die gezählt werden mit dem datum + Lines deleten nach Scan 
+        dirs = os.listdir("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"])
+        counter = len(dirs)
+        shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+len+".pdf")    
+    file1.truncate(0)
+    file1.close()
 
 if __name__ == "__main__":
 
@@ -231,7 +237,7 @@ if __name__ == "__main__":
     webapp = threading.Thread(target=webapp.run)
     webapp.daemon = True
     webapp.start()
-    #Wenn bearbeitet dann save final aufrufen TODO 
+
     while True:
         logging.getLogger("main").info("check for new files")
         file_list = read_files()

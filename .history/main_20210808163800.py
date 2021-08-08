@@ -6,35 +6,26 @@ from re import search
 import json
 import uuid
 from time import sleep
-from shutil import copyfile
+
 from PIL import Image
 import pytesseract
 
 from pdf2image import convert_from_path
-from pdf2image import PDFInfo
 
 import webapp
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(name)s - %(levelname)s - %(message)s')
-filesData = [] # Nested Dic
-# We need a dic before and a dic after 
-def save_file_temp(file, id, companies, category,dates):
-    #Save json
-    id = {   
-        "ID": id,
-        "project": "",
-        "company": companies,
-        "filepath": file,
-        "category": category,
-        "date": dates
-    }
-    jsonString = json.dumps(id)
-    jsonFile = open("data.json", "w")
-    jsonFile.write(jsonString)
-    #Move from scans to temp 
+
+def png_to_pdf(png_file, path):
+    png_file = Image.open(path)
+    pdf_file = png_file.convert('RGB')
+    pdf_file.save(path)
+
+def save_file_temp(file, id):
     shutil.move("scans/" + file, "public/temp/" +id+ ".pdf")
 
-def get_Info(file_list):
+
+def get_cat_and_date(file_list):
     #define keys
     rechnung = "Rechnung" 
     angebot = "Angebot"
@@ -43,39 +34,34 @@ def get_Info(file_list):
     file = ""
     id = uuid.uuid4
     for file in file_list:
-        # 1. kopieren 
-        copyfile('scans/' + file, 'public/temp/' + file + "_copy" )
-        # 2. copy convert
-        file = pdf_to_png(file+"_copy", 'temp/')
-        #3. analize copy
-        text = pytesseract.image_to_string(Image.open('temp/' + file+"_copy"), lang="deu")
-        #4. delete copy 
-        if os.path.isfile(file+"_copy"):
-             os.remove(file+"_copy")
+        file = pdf_to_png(file, 'scans/')
+        text = pytesseract.image_to_string(Image.open('scans/' + file), lang="deu")
+        file= png_to_pdf(file, 'scans/')
         # Extract Date
-        dates = find_date(text)
-        #Find company
-        file1 = open('Unternehmen.txt', 'w')
-        lines = file1.readlines()
-        companies = []
-        for line in lines:
-            company = search(line,text)
-            if(company is not None):
-                companies.append(company)
+        date = search(r'\d{2}.\d{2}.\d{4}', text)
+        if date is not None:
+            save_file_temp(file, id)
+        else:
+            date = date.group(0)
+            date = date.replace(".", "-")
+    else:
+        date = ""
+
         # Determine if Rechnung or Angebot or Gutachten
         category_r = search(rechnung, text)
         catergory_a = search(angebot, text)
         catergory_g = search(gutachten, text)
 
         if category_r is not None:
-            save_file_temp(file, id, companies, category_r, dates)
+            save_file_temp(file, id)
         elif catergory_a is not None:
-            save_file_temp(file, id, companies, catergory_a, dates)
+            save_file_temp(file, id)
         elif catergory_g is not None:
-            save_file_temp(file, id, companies, catergory_a, dates)
+            save_file_temp(file, id)
+
 
 def get_temp_files():
-    # TODO What is this? 
+    # TODO
     list = []
     for file in os.listdir("public/temp"):
         if file.endswith('.png'):
@@ -140,7 +126,6 @@ def read_files():
 
 
 def pdf_to_png(filename, path):
-    #TODO COpy + convert 
     # What happens if we have multiple pages?
     # just analize the first page
     # then delete it.
@@ -197,32 +182,6 @@ def find_date(text):
         date=search("r'\d{2}-"+month+"-\d{4}'", text)
     date = date.group(0)
     date_list.append(date)
-    return date
-
-#Save after editing 
-def save_Final (data): # data = dic from frontend or json? TODO  
-    #Final Json 
-    #"ID": id,
-    #"project": project,
-    #"company": company,
-    #"filepath": file,
-    #"category": category,
-    #"date": date
-    # If folder doesnt exist, create it. Afterwards add file with count if alrady existing 
-    if (os.path.isdir('public/'+data["project"]) is False):
-        os.mkdir('public/'+data["project"])
-    if (os.path.isdir('public/'+data["project"]+'/'+data["category"]) is False):
-        os.mkdir('public/'+data["project"]+'/'+data["category"])
-    if (os.path.isdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]) is False):
-        os.mkdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"])   
-    if (os.path.isfile('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]) is False):   
-          shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+".pdf")
-    # Sonst zähle auf und füge nummer hinzu TODO überarbeiten, dass nur die gezählt werden mit dem datum + Lines deleten nach Scan 
-    #Vielleicht einfach alle Dateien mit einem Counter versehen? 
-    dirs = os.listdir("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"])
-    counter = len(dirs)
-    shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+len+".pdf")    
-
 
 if __name__ == "__main__":
 
@@ -231,9 +190,9 @@ if __name__ == "__main__":
     webapp = threading.Thread(target=webapp.run)
     webapp.daemon = True
     webapp.start()
-    #Wenn bearbeitet dann save final aufrufen TODO 
-    while True:
+
+    while True:s
         logging.getLogger("main").info("check for new files")
         file_list = read_files()
-        get_Info(file_list)
+        get_cat_and_date(file_list)
         sleep(5)

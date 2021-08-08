@@ -11,7 +11,6 @@ from PIL import Image
 import pytesseract
 
 from pdf2image import convert_from_path
-from pdf2image import PDFInfo
 
 import webapp
 
@@ -200,10 +199,11 @@ def find_date(text):
     return date
 
 #Save after editing 
-def save_Final (data): # data = dic from frontend or json? TODO  
-    #Final Json 
+def save_Final (data): # data = dic from frontend  
+    # Save all editeted files in a .txt document with their id  TODO 
+    # All dicts are saved in files_data 
     #"ID": id,
-    #"project": project,
+    #"project": "blabla",
     #"company": company,
     #"filepath": file,
     #"category": category,

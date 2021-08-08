@@ -1,0 +1,9 @@
+dateparser
+#PyPDF4~=1.27.0
+fastapi
+starlette
+python-multipart
+Pillow
+uvicorn
+pytesseract
+pdf2image

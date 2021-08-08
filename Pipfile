@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+starlette = "*"
+python-multipart = "*"
+uvicorn = "*"
+pytesseract = "*"
+pdf2image = "*"
+PyPDF4 = "~=1.27.0"
+Pillow = "*"
+dateparser = "*"
+aiofiles = "*"
+jinja2 = "*"
+uuid = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
