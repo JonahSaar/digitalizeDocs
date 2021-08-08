@@ -1,8 +1,9 @@
 import logging
 import os
+import re
 import shutil
 import threading
-from re import search
+from re import findall
 import json
 import uuid
 from time import sleep
@@ -11,83 +12,123 @@ from PIL import Image
 import pytesseract
 
 from pdf2image import convert_from_path
-from pdf2image import PDFInfo
+# from pdf2image import PDFInfo
 
 import webapp
 
+DOCUMENT_PATH = "public/documents/"
+TEMP_PATH = "public/temp/"
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(name)s - %(levelname)s - %(message)s')
-filesData = [] # Nested Dic
-# We need a dic before and a dic after 
-def save_file_temp(file, id, companies, category,dates):
-    #Save json
-    id = {   
-        "ID": id,
+filesData = []  # Nested Dic
+
+
+# We need a dic before and a dic after
+def save_file_temp(file, id, companies, category, dates):
+    # Save json
+    meta_data = {
+        "id": str(id),
         "project": "",
         "company": companies,
-        "filepath": file,
         "category": category,
         "date": dates
     }
-    jsonString = json.dumps(id)
-    jsonFile = open("data.json", "w")
-    jsonFile.write(jsonString)
-    #Move from scans to temp 
-    shutil.move("scans/" + file, "public/temp/" +id+ ".pdf")
 
-def get_Info(file_list):
-    #define keys
-    rechnung = "Rechnung" 
+    jsonFile = open("public/data/" + str(id) + ".json", "w")
+    json.dump(meta_data, jsonFile)
+    jsonFile.close()
+
+    # Move from scans to temp
+    shutil.move("scans/" + file, "public/temp/" + str(id) + ".pdf")
+
+
+def get_Info(file_list: [str]):
+    temp_path = 'public/temp/'
+    # define keys
+    rechnung = "Rechnung"
     angebot = "Angebot"
     gutachten = "Gutachten"
     text = ""
-    file = ""
-    id = uuid.uuid4
+    # file = ""
+
     for file in file_list:
-        # 1. kopieren 
-        copyfile('scans/' + file, 'public/temp/' + file + "_copy" )
+        id = uuid.uuid4().hex
+
+        # 1. kopieren
+        copyfile('scans/' + file, temp_path + file + "_copy")
         # 2. copy convert
-        file = pdf_to_png(file+"_copy", 'temp/')
-        #3. analize copy
-        text = pytesseract.image_to_string(Image.open('temp/' + file+"_copy"), lang="deu")
-        #4. delete copy 
-        if os.path.isfile(file+"_copy"):
-             os.remove(file+"_copy")
+        pdf_to_png(file + "_copy", temp_path)
+        # 3. analize copy
+        text = pytesseract.image_to_string(Image.open(temp_path + file + "_copy.png"), lang="deu")
+        # 4. delete copy
+        if os.path.isfile(temp_path + file + "_copy"):
+            os.remove(temp_path + file + "_copy")
+
+        if os.path.isfile(temp_path + file + "_copy.png"):
+            os.remove(temp_path + file + "_copy.png")
         # Extract Date
         dates = find_date(text)
-        #Find company
-        file1 = open('Unternehmen.txt', 'w')
-        lines = file1.readlines()
-        companies = []
-        for line in lines:
-            company = search(line,text)
-            if(company is not None):
-                companies.append(company)
+
+        #print("Dates found:")
+        #print(dates)
+        # Find company
+        file1 = open('companies.json', 'r')
+
+        companies = json.load(file1)
+
+        found_companies = []
+
+        print(text)
+
+        for company in companies:
+
+            if company in text:
+
+
+            #if len(findall(company, text, re.IGNORECASE)) > 0:
+
+                print(f"Company found:  {company}")
+                # if company is not None:
+                found_companies += company
+
+        found_companies = list(dict.fromkeys(found_companies))
+
         # Determine if Rechnung or Angebot or Gutachten
-        category_r = search(rechnung, text)
-        catergory_a = search(angebot, text)
-        catergory_g = search(gutachten, text)
+        category_r = findall(rechnung, text)
+        catergory_a = findall(angebot, text)
+        catergory_g = findall(gutachten, text)
+
+        category_r = list(dict.fromkeys(category_r))
+        catergory_a = list(dict.fromkeys(catergory_a))
+        catergory_g = list(dict.fromkeys(catergory_g))
 
         if category_r is not None:
-            save_file_temp(file, id, companies, category_r, dates)
+            save_file_temp(file, id, found_companies, category_r, dates)
         elif catergory_a is not None:
-            save_file_temp(file, id, companies, catergory_a, dates)
+            save_file_temp(file, id, found_companies, catergory_a, dates)
         elif catergory_g is not None:
-            save_file_temp(file, id, companies, catergory_a, dates)
+            save_file_temp(file, id, found_companies, catergory_a, dates)
+
 
 def get_temp_files():
     # TODO What is this? 
     list = []
     for file in os.listdir("public/temp"):
-        if file.endswith('.png'):
-            filename = file.split(".")[0]
-            params = filename.split("_")
+        if file.endswith('.pdf'):
+            id = file.split(".")[0]
+
+            f = open('public/data/' + id + '.json', )
+            data = json.load(f)
+
+            """
+            id = file.split(".")[0]
+            list.append(id)
+                """
+
             list.append(
                 {
-                    "project": "",
-                    "company": "",
-                    "filepath": file,
-                    "category": params[0],
-                    "date": params[1]
+                    "path": file,
+                    "data": data
                 }
             )
 
@@ -140,16 +181,17 @@ def read_files():
 
 
 def pdf_to_png(filename, path):
-    #TODO COpy + convert 
+    # TODO COpy + convert
     # What happens if we have multiple pages?
     # just analize the first page
     # then delete it.
     # Store Pdf with convert_from_path function
-    images = convert_from_path(filename)
+    print("Read: " + path + filename)
+    images = convert_from_path(path + filename)
     # Save pages as images in the pdf
-    images[0].save(path + "/" + filename + '.png', 'PNG')
+    images[0].save(path + filename + '.png', 'PNG')
 
-
+"""
 def unternehmem_txt_to_json():
     file1 = open('Unternehmen.txt', 'w')
     lines = file1.readlines()
@@ -158,19 +200,41 @@ def unternehmem_txt_to_json():
     for line in lines:
         count += 1
         c.append(line)
-
+"""
 
 def find_date(text):
+    months = [
+        [
+            "Januar", "1", "01", "january", "januar"
+        ], [
+            "Januar", "1", "01", "january", "januar"
+        ], [
+            "Januar", "1", "01", "january", "januar"
+        ]
+    ]
+
     month_list = ['Januar', 'januar', 'Februar', 'februar', 'März', 'märz', 'April', 'mai', 'Mai',
                   'juni', 'Juni', 'juli', 'Juli', 'august', 'August', 'September',
-                  'september', 'oktober', 'Oktober','november', 'November', 'dezember', 'Dezember']
-    dd_mm_yyyy_pattern = "r'\d{2}.\d{2}.\d{4}'"
-    dd_mm_yyyy_pattern2 = "r'\d{2}-\d{2}-\d{4}'"
-    yyyy_mm_dd_pattern =  "r'\d{4}.\d{2}.\d{2}'"
-    yyyy_mm_dd_pattern2 = "r'\d{4}-\d{2}-\d{2}'"
+                  'september', 'oktober', 'Oktober', 'november', 'November', 'dezember', 'Dezember']
+    dd_mm_yyyy_pattern = "\d{2}.\d{2}.\d{4}"
+    dd_mm_yyyy_pattern2 = "\d{2}-\d{2}-\d{4}"
+    yyyy_mm_dd_pattern = "\d{4}.\d{2}.\d{2}"
+    yyyy_mm_dd_pattern2 = "\d{4}-\d{2}-\d{2}"
     date_list = []
+
+    date_list += search_date(dd_mm_yyyy_pattern, text)
+    date_list += search_date(dd_mm_yyyy_pattern2, text)
+    date_list += search_date(yyyy_mm_dd_pattern, text)
+    date_list += search_date(yyyy_mm_dd_pattern2, text)
+
+    """
+    #date_list.append(search_date(dd_mm_yyyy_pattern, text))
+
     #dd_mm_yyyy_pattern
     date=search(dd_mm_yyyy_pattern, text)
+
+    date_list.append(search_date(dd_mm_yyyy_pattern, text))
+
     date = date.group(0)
     date_list.append(date)
     #dd_mm_yyyy_pattern2
@@ -187,41 +251,70 @@ def find_date(text):
     date = date.group(0)
     date = date.replace(".", "-")
     date_list.append(date)
-    #Mit ausgeschrieben Monat und . 
-    for month in month_list: 
-        date=search("r'\d{2}."+month+".\d{4}'", text)
-    date = date.group(0)
-    date_list.append(date)
-    #Mit ausgeschrieben Monat und - 
-    for month in month_list: 
-        date=search("r'\d{2}-"+month+"-\d{4}'", text)
-    date = date.group(0)
-    date_list.append(date)
-    return date
+    """
 
-#Save after editing 
-def save_Final (data): # data = dic from frontend or json? TODO  
-    #Final Json 
-    #"ID": id,
-    #"project": project,
-    #"company": company,
-    #"filepath": file,
-    #"category": category,
-    #"date": date
+    # Mit ausgeschrieben Monat und .
+    for month in month_list:
+        date_list += search_date("\d{2}." + month + " \d{4}", text)
+        # date=search("r'\d{2}."+month+".\d{4}'", text)
+
+    # ate = date.group(0)
+    # date_list.append(date)
+    # Mit ausgeschrieben Monat und -
+    for month in month_list:
+        date_list += search_date("\d{2}-" + month + "-\d{4}", text)
+    # date=search("r'\d{2}-"+month+"-\d{4}'", text)
+    # date = date.group(0)
+    # date_list.append(date)
+
+    return list(dict.fromkeys(date_list))
+
+
+def search_date(pattern, text):
+    dates = re.findall(pattern, text, re.IGNORECASE)
+    new_dates = []
+    if dates:
+        for date in dates:
+            new_dates.append(date.replace(".", "-"))
+
+    print(new_dates)
+    return new_dates
+
+
+# Save after editing
+def save_Final(data):  # data = dic from frontend or json? TODO
+    # Final Json
+    # "ID": id,
+    # "project": project,
+    # "company": company,
+    # "filepath": file,
+    # "category": category,
+    # "date": date
     # If folder doesnt exist, create it. Afterwards add file with count if alrady existing 
-    if (os.path.isdir('public/'+data["project"]) is False):
-        os.mkdir('public/'+data["project"])
-    if (os.path.isdir('public/'+data["project"]+'/'+data["category"]) is False):
-        os.mkdir('public/'+data["project"]+'/'+data["category"])
-    if (os.path.isdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]) is False):
-        os.mkdir('public/'+data["project"]+'/'+data["category"]+'/'+data["company"])   
-    if (os.path.isfile('public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]) is False):   
-          shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+".pdf")
+    if (os.path.isdir(DOCUMENT_PATH + data["project"]) is False):
+        os.mkdir(DOCUMENT_PATH + data["project"])
+
+    if (os.path.isdir(DOCUMENT_PATH + data["project"] + '/' + data["category"]) is False):
+        os.mkdir(DOCUMENT_PATH + data["project"] + '/' + data["category"])
+
+    if (os.path.isdir(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"]) is False):
+        os.mkdir(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"])
+    """
+    if (os.path.isfile(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"] + "/" + data[
+        "date"] + ".pdf") is False):
+        shutil.move(TEMP_PATH + data["id"] + ".pdf",
+                    DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"] + "/" + data[
+                        "date"] + ".pdf")
+        return
+    """
+
     # Sonst zähle auf und füge nummer hinzu TODO überarbeiten, dass nur die gezählt werden mit dem datum + Lines deleten nach Scan 
-    #Vielleicht einfach alle Dateien mit einem Counter versehen? 
-    dirs = os.listdir("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"])
-    counter = len(dirs)
-    shutil.move("scans/" + id, 'public/'+data["project"]+'/'+data["category"]+'/'+data["company"]+"/"+data["date"]+len+".pdf")    
+    # Vielleicht einfach alle Dateien mit einem Counter versehen?
+    dirs = os.listdir(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"])
+    counter = len(dirs) + 1
+    shutil.move(TEMP_PATH + data["id"] + ".pdf",
+                DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"] + "/" + data[
+                    "date"] + "_"+ str(counter) + ".pdf")
 
 
 if __name__ == "__main__":
@@ -231,7 +324,7 @@ if __name__ == "__main__":
     webapp = threading.Thread(target=webapp.run)
     webapp.daemon = True
     webapp.start()
-    #Wenn bearbeitet dann save final aufrufen TODO 
+    # Wenn bearbeitet dann save final aufrufen TODO
     while True:
         logging.getLogger("main").info("check for new files")
         file_list = read_files()

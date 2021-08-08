@@ -20,14 +20,17 @@ async def read_files(request: Request):
     return getIndex(request)
 
 @app.post("/", response_class=HTMLResponse)
-async def post_file(request: Request, project: str = Form(...), company: str = Form(...), category: str = Form(...), date: str = Form(...)):
+async def post_file(request: Request, project: str = Form(...), company: str = Form(...), category: str = Form(...), date: str = Form(...), id: str = Form(...)):
+    try:
+        print(project, company, category, date)
+        checkCompany(company)
+        checkProject(project)
 
-    print(project, company, category, date)
-    checkCompany(company)
-    checkProject(project)
+        data = { "project": project, "company": company, "category": category, "date": date, "id": id }
 
-    data = { "project": project, "company": company, "category": category, "date": date}
-
+        main.save_Final(data)
+    except Exception:
+        pass
 
     return getIndex(request)
 
@@ -37,7 +40,15 @@ def getIndex(request):
     companies = main.get_companies()
     projects = main.get_projects()
 
-    return templates.TemplateResponse("index.html", {"request": request, "title": "Digitalize Docs", "projects": projects, "companies": companies, "files": files})
+    return templates.TemplateResponse("index.html",
+                                      {
+                                          "request": request,
+                                          "title": "Digitalize Docs",
+                                          "projects": projects,
+                                          "companies": companies,
+                                          "files": files
+                                        }
+                                      )
 
 
 def checkProject(project):

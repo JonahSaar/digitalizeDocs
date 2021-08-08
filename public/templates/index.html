@@ -15,25 +15,41 @@
             {% for file in files %}
                 <div class="file">
                     <iframe class="pdf"
-                        src="/public/static/pdf/web/viewer.html?file=../../../temp/Test.pdf"
+                        src="/public/static/pdf/web/viewer.html?file=../../../temp/{{file.path}}"
                         width="100%"
                         height="800px"></iframe>
 
-                    <form method="post">
-                        <h1>{{ file.filepath }}</h1>
+                    <form method="post" autocomplete="off">
+                        <h1>{{ file.data.filepath }}</h1>
                         <label>Projekt:</label>
-                        <input name="project" type="text" list="projects" value="{{ file.project }}">
+                        <input required minlength="2" name="project" type="text" list="projects" value="{{ file.data.project }}">
                         <label>Firma:</label>
-                        <input name="company" type="text" list="companies" value="{{ file.company }}">
+                        <input required minlength="2" name="company" type="text" list="companies" value="{{ file.data.company[0] }}">
                         <label>Kategorie:</label>
-                        <input name="category" value="{{ file.category }}" type="text">
+                        <input required minlength="2" name="category" value="{{ file.data.category[0] }}" type="text">
                         <label>Datum:</label>
-                        <input name="date" value="{{ file.date }}" type="text">
+                        <input required minlength="2" name="date" list="dates" value="{{ file.data.date[0] }}" type="text">
                         <input type="submit" value="Speichern">
+                        <input name="id" type="hidden" value="{{ file.data.id }}">
                     </form>
                 </div>
+
+                <datalist id="dates">
+                    {% for date in file.data.date %}
+                        <option>{{ date }}</option>
+                    {% endfor %}
+                </datalist>
             {% endfor %}
+
+            {% if files|length == 0 %}
+                <h1 class="no_new_files">Keine neuen Dateien verfügbar</h1>
+            {% endif %}
+
         </div>
+
+
+
+
 
         <datalist id="projects">
             {% for project in projects %}
