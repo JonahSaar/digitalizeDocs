@@ -82,16 +82,18 @@ def get_Info(file_list: [str]):
 
         for company in companies:
 
-            if company in text:
+            #TODO MAKE DIS CASE SENSITIVE PLS ! use search or findall
+            #if company in text:
 
-
-            #if len(findall(company, text, re.IGNORECASE)) > 0:
+            if len(findall(company, text, re.IGNORECASE)) > 0:
 
                 print(f"Company found:  {company}")
                 # if company is not None:
                 found_companies += company
 
         found_companies = list(dict.fromkeys(found_companies))
+
+        print(found_companies)
 
         # Determine if Rechnung or Angebot or Gutachten
         category_r = findall(rechnung, text)
