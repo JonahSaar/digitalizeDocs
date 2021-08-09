@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <!--    Tailwind connection
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/path/to/tailwind.css" rel="stylesheet"> -->
+    <title>{{ title }}</title>
+
+    <link rel="stylesheet" href="public/static/css/main.css">
+</head>
+<body>
+
+        <div class="files">
+            {% for file in files %}
+                <div class="file">
+                    <iframe class="pdf"
+                        src="/public/static/pdf/web/viewer.html?file=../../../temp/{{file.path}}"
+                        width="100%"
+                        height="800px"></iframe>
+
+
+                        <embed src="./../temp/81d6d375abf342aa901bd78cf05e727e.pdf" width="100%" height="800px" />
+
+
+                    <form method="post" autocomplete="off">
+                        <h1>{{file.path}}</h1>
+                        <h1>{{ file.data.filepath }}</h1>
+                        <label>Projekt:</label>
+                        <input required minlength="2" name="project" type="text" list="projects" value="{{ file.data.project }}">
+                        <label>Firma:</label>
+                        <input required minlength="2" name="company" type="text" list="companies" value="{{ file.data.company[0] }}">
+                        <label>Kategorie:</label>
+                        <input required minlength="2" name="category" value="{{ file.data.category[0] }}" type="text">
+                        <label>Datum:</label>
+                        <input required minlength="2" name="date" list="dates" value="{{ file.data.date[0] }}" type="text">
+                        <input type="submit" value="Speichern">
+                        <input name="id" type="hidden" value="{{ file.data.id }}">
+                    </form>
+                </div>
+
+                <datalist id="dates">
+                    {% for date in file.data.date %}
+                        <option>{{ date }}</option>
+                    {% endfor %}
+                </datalist>
+            {% endfor %}
+
+            {% if files|length == 0 %}
+                <h1 class="no_new_files">Keine neuen Dateien verfügbar</h1>
+            {% endif %}
+
+        </div>
+
+
+
+
+
+        <datalist id="projects">
+            {% for project in projects %}
+                <option>{{ project }}</option>
+            {% endfor %}
+        </datalist>
+
+        <datalist id="companies">
+            {% for company in companies %}
+                <option>{{ company }}</option>
+            {% endfor %}
+        </datalist>
+
+
+
+
+
+
+<script src="public/static/js/lib/pdf.min.js"></script>
+
+</body>
+</html>

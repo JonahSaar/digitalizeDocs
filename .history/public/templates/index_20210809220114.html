@@ -22,16 +22,16 @@
 
                     <form method="post" autocomplete="off">
                         <h1>{{ file.data.category[0] }}</h1>
-                        <label class="mt-3">Projekt:</label>
-                        <input class="mt-1 form-control" required minlength="2" name="project" type="text" list="projects" value="{{ file.data.project }}">
-                        <label class="mt-3">Firma:</label>
-                        <input class="mt-1 form-control" required minlength="2" name="company" type="text" list="companies" value="{{ file.data.company[0] }}">
-                        <label class="mt-3">Kategorie:</label>
-                        <input class="mt-1 form-control" required minlength="2" name="category" value="{{ file.data.category[0] }}" type="text">
-                        <label class="mt-3">Datum:</label>
-                        <input class="mt-1 form-control" required minlength="2" name="date" list="dates" value="{{ file.data.date[0] }}" type="text">
-                        <input class="mt-3 form-control btn btn-primary" type="submit" value="Speichern">
-                        <input class="mt-1 form-control" name="id" type="hidden" value="{{ file.data.id }}">
+                        <label>Projekt:</label>
+                        <input required minlength="2" name="project" type="text" list="projects" value="{{ file.data.project }}">
+                        <label>Firma:</label>
+                        <input required minlength="2" name="company" type="text" list="companies" value="{{ file.data.company[0] }}">
+                        <label>Kategorie:</label>
+                        <input required minlength="2" name="category" value="{{ file.data.category[0] }}" type="text">
+                        <label>Datum:</label>
+                        <input required minlength="2" name="date" list="dates" value="{{ file.data.date[0] }}" type="text">
+                        <input type="submit" value="Speichern">
+                        <input name="id" type="hidden" value="{{ file.data.id }}">
                     </form>
                 </div>
 
