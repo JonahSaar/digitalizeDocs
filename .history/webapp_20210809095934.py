@@ -37,7 +37,6 @@ async def post_file(request: Request, project: str = Form(...), company: str = F
 
 def getIndex(request):
     files = main.get_temp_files()
-    print(f'AAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ${files}')
     companies = main.get_companies()
     projects = main.get_projects()
 

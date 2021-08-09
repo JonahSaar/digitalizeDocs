@@ -15,12 +15,11 @@
             {% for file in files %}
                 <div class="file">
                     <iframe class="pdf"
-                        src="/public/static/pdf/web/viewer.html?file=../../../temp/{{file.path}}"
+                        src="/public/static/pdf/web/viewer.html?file=../../temp/{{file.path}}"
                         width="100%"
                         height="800px"></iframe>
 
                     <form method="post" autocomplete="off">
-                        <h1>{{file.path}}</h1>
                         <h1>{{ file.data.filepath }}</h1>
                         <label>Projekt:</label>
                         <input required minlength="2" name="project" type="text" list="projects" value="{{ file.data.project }}">

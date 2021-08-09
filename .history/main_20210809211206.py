@@ -109,7 +109,8 @@ def get_temp_files():
     for file in os.listdir (TEMP_PATH):
         if file.endswith('.pdf'):
             id = file.split(".")[0]
-            f = open(DATA_PATH + id + '.json', 'r')
+
+            f = open(TEMP_PATH + id + '.json', )
             data = json.load(f)
 
             list.append(
@@ -118,6 +119,7 @@ def get_temp_files():
                     "data": data
                 }
             )
+
     return list
 
 

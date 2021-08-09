@@ -77,12 +77,9 @@ def get_Info(file_list):
 
         print(text)
 
-        found_companies = findall(r'((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)(?:Bautenschutz|eG|Architekturbüro|Abruch-Entsorgungskonzepte|Elektroinstallation|mbH|Versorgungstechnik|Fliesenlegermeister|Bedachungen|Bauelemente|Golaschewski|Malerfachbetrieb|Fugentechnik|Trockenbau|GbR|e.?K.?|GmbH|AG|AkNW|AKNW|SE|(?:GmbH.?&.?Co.?KG))',text)
+        found_companies = findall(r'((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)(?:Bautenschutz|Architekturbüro|Abruch-Entsorgungskonzepte|Elektroinstallation|mbH|Versorgungstechnik|Fliesenlegermeister|Bedachungen|Bauelemente|Golaschewski|Malerfachbetrieb|Fugentechnik|Trockenbau|GbR|e.?K.?|GmbH|AG|AkNW|AKNW|SE|(?:GmbH.?&.?Co.?KG))',text)
         found_companies = list(dict.fromkeys(found_companies))
-        try:
-            found_companies += findall(r'?i)(?:\bINGENIEURBÜRO|Projektbau|Architekturbüro|Fugentechnik\b) ((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)(?:\n|,|.)',text)
-        except:
-            print(":^)")
+        found_companies += findall(r'?i)(?:\bINGENIEURBÜRO|Projektbau|Architekturbüro|Fugentechnik\b) ((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)',text)
         found_companies = list(dict.fromkeys(found_companies))
 
         print(found_companies)
@@ -109,7 +106,8 @@ def get_temp_files():
     for file in os.listdir (TEMP_PATH):
         if file.endswith('.pdf'):
             id = file.split(".")[0]
-            f = open(DATA_PATH + id + '.json', 'r')
+
+            f = open(DATA_PATH + id + '.json', )
             data = json.load(f)
 
             list.append(
@@ -118,6 +116,7 @@ def get_temp_files():
                     "data": data
                 }
             )
+
     return list
 
 

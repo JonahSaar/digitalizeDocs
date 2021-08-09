@@ -16,6 +16,7 @@ dateparser = "*"
 aiofiles = "*"
 jinja2 = "*"
 uuid = "*"
+poppler = "*"
 
 [dev-packages]
 

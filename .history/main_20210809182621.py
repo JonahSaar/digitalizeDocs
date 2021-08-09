@@ -12,6 +12,8 @@ from PIL import Image
 import pytesseract
 
 from pdf2image import convert_from_path
+import os.path as osp
+import subprocess
 import webapp
 
 DOCUMENT_PATH = "public/documents/" 
@@ -77,12 +79,9 @@ def get_Info(file_list):
 
         print(text)
 
-        found_companies = findall(r'((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)(?:Bautenschutz|eG|Architekturbüro|Abruch-Entsorgungskonzepte|Elektroinstallation|mbH|Versorgungstechnik|Fliesenlegermeister|Bedachungen|Bauelemente|Golaschewski|Malerfachbetrieb|Fugentechnik|Trockenbau|GbR|e.?K.?|GmbH|AG|AkNW|AKNW|SE|(?:GmbH.?&.?Co.?KG))',text)
+        found_companies = findall(r'((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)(?:Bautenschutz|Architekturbüro|Abruch-Entsorgungskonzepte|Elektroinstallation|mbH|Versorgungstechnik|Fliesenlegermeister|Bedachungen|Bauelemente|Golaschewski|Malerfachbetrieb|Fugentechnik|Trockenbau|GbR|e.?K.?|GmbH|AG|AkNW|AKNW|SE|(?:GmbH.?&.?Co.?KG))',text)
         found_companies = list(dict.fromkeys(found_companies))
-        try:
-            found_companies += findall(r'?i)(?:\bINGENIEURBÜRO|Projektbau|Architekturbüro|Fugentechnik\b) ((?:\w(?:\, ?| |(?: ?\& ?)|-|\. ?)?)*)(?:\n|,|.)',text)
-        except:
-            print(":^)")
+        found_companies += findall(r'?i)(?:\bINGENIEURBÜRO|Projektbau|Architekturbüro|Fugentechnik\b) ((?:\w.?)*))',text)
         found_companies = list(dict.fromkeys(found_companies))
 
         print(found_companies)
@@ -109,7 +108,8 @@ def get_temp_files():
     for file in os.listdir (TEMP_PATH):
         if file.endswith('.pdf'):
             id = file.split(".")[0]
-            f = open(DATA_PATH + id + '.json', 'r')
+
+            f = open(DATA_PATH + id + '.json', )
             data = json.load(f)
 
             list.append(
@@ -118,6 +118,7 @@ def get_temp_files():
                     "data": data
                 }
             )
+
     return list
 
 
@@ -172,64 +173,35 @@ def pdf_to_png(filename, path):
 
 
 def find_date(text):
-    months = [ #Maybe use it later TODO 
+    months = [
         [
-            "Januar", "januar", "01" 
+            "Januar", "1", "01", "january", "januar"
         ], [
-            "Februar", "februar", "02"
+            "Januar", "1", "01", "january", "januar"
         ], [
-            "März", "märz", "03" 
-        ] , [
-            "April", "april", "04" 
-        ] , [
-            "Mai", "Mai", "05" 
-        ] , [
-            "Juni", "juni", "06" 
-        ] , [
-            "Juli", "juli", "07" 
-        ] , [
-            "August", "08", "august"
-        ] , [
-            "September", "september","09" 
-        ] , [
-            "Oktober","oktober", "10" 
-        ] , [
-            "November","november", "11" 
-        ] , [
-            "Dezember","dezember", "12" 
+            "Januar", "1", "01", "january", "januar"
         ]
     ]
 
     month_list = ['Januar', 'januar', 'Februar', 'februar', 'März', 'märz', 'April', 'mai', 'Mai',
                   'juni', 'Juni', 'juli', 'Juli', 'august', 'August', 'September',
                   'september', 'oktober', 'Oktober', 'november', 'November', 'dezember', 'Dezember']
-    dd_mm_yyyy_pattern = r'^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$'
+    dd_mm_yyyy_pattern = "\d{2}.\d{2}.\d{4}"
+    dd_mm_yyyy_pattern2 = "\d{2}-\d{2}-\d{4}"
     yyyy_mm_dd_pattern = "\d{4}.\d{2}.\d{2}"
     yyyy_mm_dd_pattern2 = "\d{4}-\d{2}-\d{2}"
     date_list = []
-    date_list_ausgeschrieben = []
+
     date_list += list(dict.fromkeys(search_date(dd_mm_yyyy_pattern, text)))
+    date_list += list(dict.fromkeys(search_date(dd_mm_yyyy_pattern2, text)))
     date_list += list(dict.fromkeys(search_date(yyyy_mm_dd_pattern, text)))
     date_list += list(dict.fromkeys(search_date(yyyy_mm_dd_pattern2, text)))
 
-    # Mit ausgeschrieben Monat und .FYI I know Dennis regex richtig nutzen. Dont tell me ok? 
+    # Mit ausgeschrieben Monat und .
     for month in month_list:
-        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}." + month + " \d{4}", text)))
-        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}-" + month + "-\d{4}", text)))
-        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}" + month + "\d{4}", text)))
-        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}." + month + "\d{4}", text)))
-        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{1}." + month + "\d{4}", text))) #TODO add zero
-
-
-    for date in date_list_ausgeschrieben:   # für jedes gefundene datum
-        for month in months:                # suche jeweils eine liste pro Monat raus
-            if month.index(0) in date:      # Checke ob Mmonat großgeschrieben
-                date.replace(month.index(0), month.index(2)) 
-                continue
-            if month.index(1) in date:      #Checke ob Monat kleingeschrieben
-                date.replace(month.index(1), month.index(2))
-
-    date_list += list(dict.fromkeys(date_list_ausgeschrieben))
+        date_list += search_date("\d{2}." + month + " \d{4}", text)
+    for month in month_list:
+        date_list += search_date("\d{2}-" + month + "-\d{4}", text)
 
     return list(dict.fromkeys(date_list)) #Schmeißt sofort alle duplikate raus
 
@@ -240,6 +212,7 @@ def search_date(pattern, text):
     if dates:
         for date in dates:
             new_dates.append(date.replace(".", "-"))
+
     print(new_dates)
     return new_dates
 
