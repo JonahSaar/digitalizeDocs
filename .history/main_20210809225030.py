@@ -183,7 +183,7 @@ def find_date(text):
         ] , [
             "Juli", "juli", "07" 
         ] , [
-            "August", "august", "08"
+            "August", "08", "august"
         ] , [
             "September", "september","09" 
         ] , [
@@ -198,55 +198,49 @@ def find_date(text):
     month_list = ['Januar', 'januar', 'Februar', 'februar', 'März', 'märz', 'April', 'mai', 'Mai',
                   'juni', 'Juni', 'juli', 'Juli', 'august', 'August', 'September',
                   'september', 'oktober', 'Oktober', 'november', 'November', 'dezember', 'Dezember']
-
-    dd_mm_yyyy_pattern = "\d{2}.\d{2}.\d{4}"
-    dd_mm_yyyy_pattern2 = "\d{2}-\d{2}-\d{4}"
-    dd_mm_yyyy_pattern3 = "\d{2}.\d{2}.\d{2}"
-    dd_mm_yyyy_pattern4 = "\d{2}-\d{2}-\d{2}"
-
+    dd_mm_yyyy_pattern = "(\d{2})(?:\s*(?:\,|\\|\/|\.|-)\s*)(\d{2})(?:\s*(?:\,|\\|\/|\.|-)\s*)(\d{4})|(\d{4})(?:\s*(?:\,|\\|\/|\.|-)\s*)(\d{2})(?:\s*(?:\,|\\|\/|\.|-)\s*)(\d{2})|(\d{2})(?:\s*(?:\,|\\|\/|\.|-)\s*)(\d{2})(?:\s*(?:\,|\\|\/|\.|-)\s*)(\d{2})"
     yyyy_mm_dd_pattern = "\d{4}.\d{2}.\d{2}"
     yyyy_mm_dd_pattern2 = "\d{4}-\d{2}-\d{2}"
-
     date_list = []
     date_list_ausgeschrieben = []
-
     date_list += search_date(dd_mm_yyyy_pattern, text)
-    date_list += search_date(dd_mm_yyyy_pattern2, text)
-    date_list += search_date(dd_mm_yyyy_pattern3, text)
-    date_list += search_date(dd_mm_yyyy_pattern4, text)
     date_list += search_date(yyyy_mm_dd_pattern, text)
     date_list += search_date(yyyy_mm_dd_pattern2, text)
 
     # Mit ausgeschrieben Monat und .FYI I know Dennis regex richtig nutzen. Dont tell me ok? 
     for month in month_list:
-        #21. November2019
-        date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
-        date_list_ausgeschrieben += search_date("\d{2} " + month + " \d{4}", text)
-        date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
-        date_list_ausgeschrieben += search_date("\d{1}. " + month + " \d{4}", text) #TODO add zero
+        date_list_ausgeschrieben += search_date("\d{2}." + month + " \d{4}", text)
+        date_list_ausgeschrieben += search_date("\d{2}-" + month + "-\d{4}", text)
+        date_list_ausgeschrieben += search_date("\d{2}" + month + "\d{4}", text)
+        date_list_ausgeschrieben += search_date("\d{2}." + month + "\d{4}", text)
+        date_list_ausgeschrieben += search_date("\d{1}." + month + "\d{4}", text) #TODO add zero
+
+
     for date in date_list_ausgeschrieben:   # für jedes gefundene datum
         for month in months:                # suche jeweils eine liste pro Monat raus
-            if month[0] in date:      # Checke ob Mmonat großgeschrieben
-                dateNext = date.replace(month[0], (month[2]+"-")) 
-                date_list.append(dateNext.replace (" ", ""))
+            if month.index(0) in date:      # Checke ob Mmonat großgeschrieben
+                date.replace(month.index(0), month.index(2)) 
                 continue
-            if month[1] in date:      #Checke ob Monat kleingeschrieben
-               dateNext = date.replace(month[1], (month[2]+"-"))
-               date_list.append(dateNext.replace (" ", ""))
-    return_List = []
-    for date in date_list:
-        return_List += (re.findall("\d{2}-\d{2}-\d{4}",date))
-    print (return_List)
-    return return_List
+            if month.index(1) in date:      #Checke ob Monat kleingeschrieben
+                date.replace(month.index(1), month.index(2))
+
+    date_list += date_list_ausgeschrieben
+
+    return date_list #Schmeißt sofort alle duplikate raus
 
 
 def search_date(pattern, text):
     dates = re.findall(pattern, text)
+    print("############")
+    # print(text)
+    print(dates)
+    print("###################################")
+
     new_dates = []
     if dates:
         for date in dates:
             new_dates.append(date.replace(".", "-"))
-    
+    print(new_dates)
     return list(dict.fromkeys(new_dates))
 
 

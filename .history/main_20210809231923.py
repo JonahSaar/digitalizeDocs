@@ -224,6 +224,8 @@ def find_date(text):
         date_list_ausgeschrieben += search_date("\d{2} " + month + " \d{4}", text)
         date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
         date_list_ausgeschrieben += search_date("\d{1}. " + month + " \d{4}", text) #TODO add zero
+
+    print(date_list_ausgeschrieben)
     for date in date_list_ausgeschrieben:   # für jedes gefundene datum
         for month in months:                # suche jeweils eine liste pro Monat raus
             if month[0] in date:      # Checke ob Mmonat großgeschrieben
@@ -233,11 +235,8 @@ def find_date(text):
             if month[1] in date:      #Checke ob Monat kleingeschrieben
                dateNext = date.replace(month[1], (month[2]+"-"))
                date_list.append(dateNext.replace (" ", ""))
-    return_List = []
-    for date in date_list:
-        return_List += (re.findall("\d{2}-\d{2}-\d{4}",date))
-    print (return_List)
-    return return_List
+    print (date_list)
+    return date_list #Schmeißt sofort alle duplikate raus
 
 
 def search_date(pattern, text):

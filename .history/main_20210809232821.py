@@ -224,6 +224,8 @@ def find_date(text):
         date_list_ausgeschrieben += search_date("\d{2} " + month + " \d{4}", text)
         date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
         date_list_ausgeschrieben += search_date("\d{1}. " + month + " \d{4}", text) #TODO add zero
+
+    print(date_list_ausgeschrieben)
     for date in date_list_ausgeschrieben:   # für jedes gefundene datum
         for month in months:                # suche jeweils eine liste pro Monat raus
             if month[0] in date:      # Checke ob Mmonat großgeschrieben
@@ -233,10 +235,10 @@ def find_date(text):
             if month[1] in date:      #Checke ob Monat kleingeschrieben
                dateNext = date.replace(month[1], (month[2]+"-"))
                date_list.append(dateNext.replace (" ", ""))
+    print (date_list)
     return_List = []
     for date in date_list:
-        return_List += (re.findall("\d{2}-\d{2}-\d{4}",date))
-    print (return_List)
+        return_List += re.findall(r"(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})", date)
     return return_List
 
 

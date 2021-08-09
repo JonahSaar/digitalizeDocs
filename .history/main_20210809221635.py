@@ -183,7 +183,7 @@ def find_date(text):
         ] , [
             "Juli", "juli", "07" 
         ] , [
-            "August", "august", "08"
+            "August", "08", "august"
         ] , [
             "September", "september","09" 
         ] , [
@@ -198,56 +198,45 @@ def find_date(text):
     month_list = ['Januar', 'januar', 'Februar', 'februar', 'März', 'märz', 'April', 'mai', 'Mai',
                   'juni', 'Juni', 'juli', 'Juli', 'august', 'August', 'September',
                   'september', 'oktober', 'Oktober', 'november', 'November', 'dezember', 'Dezember']
-
-    dd_mm_yyyy_pattern = "\d{2}.\d{2}.\d{4}"
-    dd_mm_yyyy_pattern2 = "\d{2}-\d{2}-\d{4}"
-    dd_mm_yyyy_pattern3 = "\d{2}.\d{2}.\d{2}"
-    dd_mm_yyyy_pattern4 = "\d{2}-\d{2}-\d{2}"
-
+    dd_mm_yyyy_pattern = r'(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})'
     yyyy_mm_dd_pattern = "\d{4}.\d{2}.\d{2}"
     yyyy_mm_dd_pattern2 = "\d{4}-\d{2}-\d{2}"
-
     date_list = []
     date_list_ausgeschrieben = []
-
-    date_list += search_date(dd_mm_yyyy_pattern, text)
-    date_list += search_date(dd_mm_yyyy_pattern2, text)
-    date_list += search_date(dd_mm_yyyy_pattern3, text)
-    date_list += search_date(dd_mm_yyyy_pattern4, text)
-    date_list += search_date(yyyy_mm_dd_pattern, text)
-    date_list += search_date(yyyy_mm_dd_pattern2, text)
+    date_list += list(dict.fromkeys(search_date(dd_mm_yyyy_pattern, text)))
+    date_list += list(dict.fromkeys(search_date(yyyy_mm_dd_pattern, text)))
+    date_list += list(dict.fromkeys(search_date(yyyy_mm_dd_pattern2, text)))
 
     # Mit ausgeschrieben Monat und .FYI I know Dennis regex richtig nutzen. Dont tell me ok? 
     for month in month_list:
-        #21. November2019
-        date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
-        date_list_ausgeschrieben += search_date("\d{2} " + month + " \d{4}", text)
-        date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
-        date_list_ausgeschrieben += search_date("\d{1}. " + month + " \d{4}", text) #TODO add zero
+        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}." + month + " \d{4}", text)))
+        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}-" + month + "-\d{4}", text)))
+        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}" + month + "\d{4}", text)))
+        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{2}." + month + "\d{4}", text)))
+        date_list_ausgeschrieben += list(dict.fromkeys(search_date("\d{1}." + month + "\d{4}", text))) #TODO add zero
+
+
     for date in date_list_ausgeschrieben:   # für jedes gefundene datum
         for month in months:                # suche jeweils eine liste pro Monat raus
-            if month[0] in date:      # Checke ob Mmonat großgeschrieben
-                dateNext = date.replace(month[0], (month[2]+"-")) 
-                date_list.append(dateNext.replace (" ", ""))
+            if month.index(0) in date:      # Checke ob Mmonat großgeschrieben
+                date.replace(month.index(0), month.index(2)) 
                 continue
-            if month[1] in date:      #Checke ob Monat kleingeschrieben
-               dateNext = date.replace(month[1], (month[2]+"-"))
-               date_list.append(dateNext.replace (" ", ""))
-    return_List = []
-    for date in date_list:
-        return_List += (re.findall("\d{2}-\d{2}-\d{4}",date))
-    print (return_List)
-    return return_List
+            if month.index(1) in date:      #Checke ob Monat kleingeschrieben
+                date.replace(month.index(1), month.index(2))
+
+    date_list += list(dict.fromkeys(date_list_ausgeschrieben))
+
+    return list(dict.fromkeys(date_list)) #Schmeißt sofort alle duplikate raus
 
 
 def search_date(pattern, text):
-    dates = re.findall(pattern, text)
+    dates = re.findall(pattern, text, re.IGNORECASE)
     new_dates = []
     if dates:
         for date in dates:
             new_dates.append(date.replace(".", "-"))
-    
-    return list(dict.fromkeys(new_dates))
+    print(new_dates)
+    return new_dates
 
 
 # Save after editing

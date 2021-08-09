@@ -183,7 +183,7 @@ def find_date(text):
         ] , [
             "Juli", "juli", "07" 
         ] , [
-            "August", "august", "08"
+            "August", "08", "august"
         ] , [
             "September", "september","09" 
         ] , [
@@ -224,20 +224,22 @@ def find_date(text):
         date_list_ausgeschrieben += search_date("\d{2} " + month + " \d{4}", text)
         date_list_ausgeschrieben += search_date("\d{2}. " + month + " \d{4}", text)
         date_list_ausgeschrieben += search_date("\d{1}. " + month + " \d{4}", text) #TODO add zero
+
+    print(date_list_ausgeschrieben)
     for date in date_list_ausgeschrieben:   # für jedes gefundene datum
         for month in months:                # suche jeweils eine liste pro Monat raus
             if month[0] in date:      # Checke ob Mmonat großgeschrieben
+                print("Vorher:"+date) 
+                print("Ich soll replaces werden mit:" + month[2])
                 dateNext = date.replace(month[0], (month[2]+"-")) 
-                date_list.append(dateNext.replace (" ", ""))
+                date_list += dateNext.replace (" ", "")
+                print("Nachher:"+date) 
                 continue
             if month[1] in date:      #Checke ob Monat kleingeschrieben
                dateNext = date.replace(month[1], (month[2]+"-"))
-               date_list.append(dateNext.replace (" ", ""))
-    return_List = []
-    for date in date_list:
-        return_List += (re.findall("\d{2}-\d{2}-\d{4}",date))
-    print (return_List)
-    return return_List
+               date_list += dateNext.replace (" ", "")
+    print ("Hey ich wurde bearbeitet jetzt sehe ich so aus: ")
+    return date_list #Schmeißt sofort alle duplikate raus
 
 
 def search_date(pattern, text):
@@ -246,7 +248,6 @@ def search_date(pattern, text):
     if dates:
         for date in dates:
             new_dates.append(date.replace(".", "-"))
-    
     return list(dict.fromkeys(new_dates))
 
 

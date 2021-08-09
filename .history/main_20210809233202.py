@@ -235,8 +235,7 @@ def find_date(text):
                date_list.append(dateNext.replace (" ", ""))
     return_List = []
     for date in date_list:
-        return_List += (re.findall("\d{2}-\d{2}-\d{4}",date))
-    print (return_List)
+        return_List.append(re.findall("\d{2}-\d{2}-\d{4}",date))
     return return_List
 
 
