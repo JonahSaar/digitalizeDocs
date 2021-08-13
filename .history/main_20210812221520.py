@@ -258,7 +258,7 @@ def save_Final(data):
     CATEGORY_PATH = data["category"]
     COMPANY_PATH = data["company"]
     
-    # If folder doesnt exist, create it. Afterwards add file with counter
+    # If folder doesnt exist, create it. Afterwards add file with count if alrady existing 
     if (os.path.isdir(DOCUMENT_PATH + PROJECT_PATH) is False):
         os.mkdir(DOCUMENT_PATH + PROJECT_PATH)
 

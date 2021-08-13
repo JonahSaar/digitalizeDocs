@@ -269,6 +269,8 @@ def save_Final(data):
         os.mkdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH)
 
     #Save with counter 
+    print (TEMP_PATH + data["id"] + ".pdf")
+    print (DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH + "/" + data["date"] + "_"+ str(counter) + ".pdf")
     dirs = os.listdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH)
     counter = len(dirs) + 1
     shutil.move (TEMP_PATH + data["id"] + ".pdf", DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH + "/" + data["date"] + "_"+ str(counter) + ".pdf")

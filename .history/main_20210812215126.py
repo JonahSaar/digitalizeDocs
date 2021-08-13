@@ -19,8 +19,6 @@ TEMP_PATH = "public/temp/"
 SCANS_PATH = "scans/"
 DATA_PATH = "public/data/"
 
-
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(name)s - %(levelname)s - %(message)s')
 filesData = []  # Nested Dic
 
@@ -254,26 +252,23 @@ def search_date(pattern, text):
 
 # Save after editing
 def save_Final(data):  
-    PROJECT_PATH = data["project"]
-    CATEGORY_PATH = data["category"]
-    COMPANY_PATH = data["company"]
-    
-    # If folder doesnt exist, create it. Afterwards add file with counter
-    if (os.path.isdir(DOCUMENT_PATH + PROJECT_PATH) is False):
-        os.mkdir(DOCUMENT_PATH + PROJECT_PATH)
+    # If folder doesnt exist, create it. Afterwards add file with count if alrady existing 
+    if (os.path.isdir(DOCUMENT_PATH + data["project"]) is False):
+        os.mkdir(DOCUMENT_PATH + data["project"])
 
-    if (os.path.isdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH) is False):
-        os.mkdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH)
+    if (os.path.isdir(DOCUMENT_PATH + data["project"] + '/' + data["category"]) is False):
+        os.mkdir(DOCUMENT_PATH + data["project"] + '/' + data["category"])
 
-    if (os.path.isdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH) is False):
-        os.mkdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH)
+    if (os.path.isdir(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"]) is False):
+        os.mkdir(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"])
 
     #Save with counter 
-    dirs = os.listdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH)
+    dirs = os.listdir(DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"])
     counter = len(dirs) + 1
-    shutil.move (TEMP_PATH + data["id"] + ".pdf", DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH + "/" + data["date"] + "_"+ str(counter) + ".pdf")
-    os.remove (DATA_PATH + data["id"] + ".json")
-    
+    shutil.move (TEMP_PATH + data["id"] + ".pdf",
+                DOCUMENT_PATH + data["project"] + '/' + data["category"] + '/' + data["company"] + "/" + data[
+                    "date"] + "_"+ str(counter) + ".pdf")
+    print("I moved something")
 
 if __name__ == "__main__":
 

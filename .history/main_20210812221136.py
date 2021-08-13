@@ -258,7 +258,7 @@ def save_Final(data):
     CATEGORY_PATH = data["category"]
     COMPANY_PATH = data["company"]
     
-    # If folder doesnt exist, create it. Afterwards add file with counter
+    # If folder doesnt exist, create it. Afterwards add file with count if alrady existing 
     if (os.path.isdir(DOCUMENT_PATH + PROJECT_PATH) is False):
         os.mkdir(DOCUMENT_PATH + PROJECT_PATH)
 
@@ -271,8 +271,12 @@ def save_Final(data):
     #Save with counter 
     dirs = os.listdir(DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH)
     counter = len(dirs) + 1
-    shutil.move (TEMP_PATH + data["id"] + ".pdf", DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH + "/" + data["date"] + "_"+ str(counter) + ".pdf")
+    dest = shutil.move (TEMP_PATH + data["id"] + ".pdf",
+                DOCUMENT_PATH + PROJECT_PATH + '/' + CATEGORY_PATH + '/' + COMPANY_PATH + 
+                "/" + data["date"] + "_"+ str(counter) + ".pdf")
+    print (dest)
     os.remove (DATA_PATH + data["id"] + ".json")
+    print("I removed something")
     
 
 if __name__ == "__main__":
